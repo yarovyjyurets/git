@@ -3,11 +3,11 @@ def call(def imageTag, def clusterName) {
   def promoteToDevJobName = "${JENKINS_URL}job/deploy-to-dev"
 
   echo 'DEV link'
-  echo "${promoteToDevJobName}/buildWithParameters/?imageTag=${encodedImageTag}&clusterName=${clusterName}"
+  echo "${promoteToDevJobName}/parambuild/?imageTag=${encodedImageTag}&clusterName=${clusterName}"
 
   currentBuild.description = """
   <div>
-    <a href='${promoteToDevJobName}/buildWithParameters/?imageTag=${encodedImageTag}&clusterName=${clusterName}'>
+    <a href='${promoteToDevJobName}/parambuild/?imageTag=${encodedImageTag}&clusterName=${clusterName}'>
       Promote to DEV
     </a>
   </div>
