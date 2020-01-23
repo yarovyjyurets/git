@@ -19,8 +19,13 @@ Listing labels
 - kubectl get po -L creation_method,env
 
 Listing subsets of pods through label selectors
+- kubectl get po -l creation_method=manual; kubectl get po -l env=debug; kubectl get po -l creation_method=manual,env=debug;
+- kubectl get po -l 'env in (prod,devel)'
+- kubectl get po -l creation_method!=manual; kubectl get po -l env!=debug
+- kubectl get po -l creation_method
+- kubectl get po -l '!env'
 
-Modifying labels of existing pods
+Modifying/adding labels of existing pods
 - kubectl label po kubia-manual creation_method=manual
 - kubectl label po kubia-manual-v2 env=debug --overwrite
 - kubectl create -f kubia-manual.yaml
@@ -29,7 +34,7 @@ INFO
 -
 - kubectl cluster-info
 - kubectl get nodes|no
-- kubectl get pods|po [-o wide]
+- kubectl get pods|po [-o wide|yaml]
 - kubectl get replicationcontrollers|rc
 - kubectl describe node <node>
 - kubectl describe pod|po
