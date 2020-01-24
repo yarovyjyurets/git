@@ -3,8 +3,8 @@ kind: Pod
 metadata:
   name: kubia-manual
 spec:
-  nodeSelector:
-    gpu: "true" #for selecting node by label in node
+  # nodeSelector:
+  #   gpu: "true" #for selecting node by label in node
   containers:
   - image: luksa/kubia
     name: kubia
