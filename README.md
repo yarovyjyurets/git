@@ -98,3 +98,5 @@ It has three essential parts:
 >`TIP` Don’t specify a pod selector when defining a ReplicationController. Let
 Kubernetes extract it from the pod template. This will keep your YAML
 shorter and simpler.
+- sudo ifconfig eth0 down `kill the node on GKE`
+- gcloud compute instances reset {nodeId}
