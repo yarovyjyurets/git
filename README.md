@@ -28,6 +28,7 @@ INFO
 - kubectl describe node <node>
 - kubectl describe pod|po
 - kubectl describe pod|po
+- kubectl describe servise|svc  
 
 LOGS
 -
@@ -98,5 +99,36 @@ It has three essential parts:
 >`TIP` Don’t specify a pod selector when defining a ReplicationController. Let
 Kubernetes extract it from the pod template. This will keep your YAML
 shorter and simpler.
+- gcloud compute ssh {GKE node}
 - sudo ifconfig eth0 down `kill the node on GKE`
 - gcloud compute instances reset {nodeId}
+>`TIP` If you know a pod is malfunctioning, you can take it out of the Replication-
+Controller’s scope, let the controller replace it with a new one, and then debug or
+play with the pod in any way you want.
+- kubectl edit rc kubia `edit already create rc template`
+- kubectl scale rc kubia --replicas=10
+>`TIP` Deleting a replication controller with `--cascade=false` leaves pods unmanaged
+- kubectl delete rc kubia --cascade=false
+
+ReplicaSet
+-
+>`INFO` A ReplicaSet behaves exactly like a ReplicationController, but it has more expressive
+pod selectors.
+- kubectl get rs
+- kubectl describe rs
+
+```
+selector
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - kubia
+```
+**Valid operators:**
+>* `In` — Label’s value must match one of the specified values .
+>* `NotIn` — Label’s value must not match any of the specified values .
+>* `Exists` — Pod must include a label with the specified key (the value isn’t import-
+ant). When using this operator, you shouldn’t specify the values field.
+>* `DoesNotExist` — Pod must not include a label with the specified key. The values
+property must not be specified.
