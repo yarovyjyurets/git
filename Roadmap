@@ -1,0 +1,37 @@
+====== The module system and its patterns. =========
+defining a module
+defining globals
+module.exports vs exports
+resolving algorithm
+the module cache
+cycles
+ - Module definition patterns
+named exports
+exporting a function, constructor, instance
+- Refs:
+https://nodejs.org/docs/latest/api/modules.html
+https://www.freecodecamp.org/news/requiring-modules-in-node-js-everything-you-need-to-know-e7fbd119be8/
+https://adrianmejia.com/getting-started-with-node-js-modules-require-exports-imports-npm-and-beyond/
+
+====== The obeserver pattern/events ======
+the EvenEmitter
+propagating errors
+sync vs async events
+EventEmmiter vs callbacks (their combination)
+- Refs:
+https://nodejs.org/api/events.html#events_asynchronous_vs_synchronous
+https://codeburst.io/event-emitters-and-listeners-in-javascript-9cf0c639fd63
+https://wanago.io/2019/02/18/typescript-node-js-eventemitter/
+
+====== Asynchronos Control Flow  ======
+callbacks (callback hell)
+promises, promisify, parallel/sequential execution
+generators
+
+====== Streams ======
+Anatomy of streams
+Types: Readable, Writable, Duplex, Transform
+
+
+
+EventLoop https://wanago.io/2019/04/08/node-js-typescript-event-loop/
