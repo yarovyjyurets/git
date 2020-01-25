@@ -132,3 +132,74 @@ selector
 ant). When using this operator, you shouldn’t specify the values field.
 >* `DoesNotExist` — Pod must not include a label with the specified key. The values
 property must not be specified.
+
+DaemonSets
+-
+When you want pod to run on each and every node in the cluster
+> Nodes can be made unschedulable,
+preventing pods from being deployed to them. A DaemonSet will deploy pods
+even to such nodes, because the unschedulable attribute is only used by the
+Scheduler, whereas pods managed by a DaemonSet bypass the Scheduler
+completely. This is usually desirable, because DaemonSets are meant to run
+system services, which usually need to run even on unschedulable nodes.
+- kubectl label node minikube disk=ssd --overwrite
+
+Job/CronJob resources
+-
+Jobs are useful for ad hoc tasks, where it’s crucial that the task fin-
+ishes properly.
+- k create -f k8s/kubia-job.yaml
+- k get job
+>`INFO` Jobs may be configured to create more than one pod instance and run them in paral-
+lel or sequentially. This is done by setting the `completions` and the p`arallelism` prop-
+erties in the Job spec
+
+Services
+-
+>* `Pods are ephemeral`—They may come and go at any time, whether it’s because a
+pod is removed from a node to make room for other pods, because someone
+scaled down the number of pods, or because a cluster node has failed.
+>* `Kubernetes assigns an IP address to a pod after the pod has been scheduled to a node and before it’s started` — Clients thus can’t know the IP address of the server pod
+up front.
+>* `Horizontal scaling means multiple pods may provide the same service` — Each of those
+pods has its own IP address. Clients shouldn’t care how many pods are backing
+the service and what their IPs are. They shouldn’t have to keep a list of all the
+individual IPs of pods. Instead, all those pods should be accessible through a
+single IP address.
+
+To solve these problems, Kubernetes also provides another resource type — `Services`
+
+You can send requests to your service from within the cluster in a few ways:
+>* The obvious way is to create a pod that will send the request to the service’s
+cluster IP and log the response. You can then examine the pod’s log to see
+what the service’s response was.
+>* You can ssh into one of the Kubernetes nodes and use the curl command.
+>* You can execute the curl command inside one of your existing pods through
+the kubectl exec command.
+
+- kubectl exec pod -- curl -s {url}
+
+`sessionAffinity`: ClientIP|Node -  makes the service proxy redirect all requests originating from the same client IP
+to the same pod.
+>`NOTE` When creating a service with multiple ports, you must specify a name
+for each port.
+```
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: https
+      port: 443
+      targetPort: 8443
+  selector:
+    app: kubia
+```
+>`TIP` But why should you even bother with **naming ports**? The biggest benefit of doing so is
+that it enables you to change port numbers later without having to change the service
+spec.
+
+*DISCOVERING SERVICES THROUGH ENVIRONMENT VARIABLES*
+*DISCOVERING SERVICES THROUGH DNS*
+- curl http://kubia.default.svc.cluster.local
+*Connecting to services living outside the cluster* 5.2

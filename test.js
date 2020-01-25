@@ -1,2 +1,1 @@
-First commit
-add new line
+const a = 1;
