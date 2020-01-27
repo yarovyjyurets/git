@@ -1,3 +1,4 @@
+https://www.yunforum.net/pdf/kubernetes-in-action.pdf
 COMMANDS
 -
 
@@ -87,6 +88,8 @@ STOPPING AND REMOVING PODS
 everything. Certain resources (like Secrets, which we’ll introduce in chapter 7)
 are preserved and need to be deleted explicitly.
 
+---
+# Replication and other controllers: deploying managed pods
 ReplicationController
 -
 It has three essential parts:
@@ -133,8 +136,7 @@ ant). When using this operator, you shouldn’t specify the values field.
 >* `DoesNotExist` — Pod must not include a label with the specified key. The values
 property must not be specified.
 
-DaemonSets
--
+# DaemonSets
 When you want pod to run on each and every node in the cluster
 > Nodes can be made unschedulable,
 preventing pods from being deployed to them. A DaemonSet will deploy pods
@@ -144,8 +146,8 @@ completely. This is usually desirable, because DaemonSets are meant to run
 system services, which usually need to run even on unschedulable nodes.
 - kubectl label node minikube disk=ssd --overwrite
 
-Job/CronJob resources
--
+# Job/CronJob resources
+
 Jobs are useful for ad hoc tasks, where it’s crucial that the task fin-
 ishes properly.
 - k create -f k8s/kubia-job.yaml
@@ -154,8 +156,8 @@ ishes properly.
 lel or sequentially. This is done by setting the `completions` and the p`arallelism` prop-
 erties in the Job spec
 
-Services
--
+# Services
+
 >* `Pods are ephemeral`—They may come and go at any time, whether it’s because a
 pod is removed from a node to make room for other pods, because someone
 scaled down the number of pods, or because a cluster node has failed.
@@ -169,6 +171,19 @@ single IP address.
 
 To solve these problems, Kubernetes also provides another resource type — `Services`
 
+A Kubernetes `Service` is a resource you create to make a single, constant point of
+entry to a group of pods providing the same service.
+
+Creating services
+-
+- k create -f kubia-svc.yaml
+
+The `expose` command created a Service resource with the same pod selector as the one
+used by the ReplicationController, thereby exposing all its pods through a single IP
+address and port.
+
+- kubectl expose rc {name} --type=LoadBalancer --name kubia-http
+
 You can send requests to your service from within the cluster in a few ways:
 >* The obvious way is to create a pod that will send the request to the service’s
 cluster IP and log the response. You can then examine the pod’s log to see
@@ -179,8 +194,15 @@ the kubectl exec command.
 
 - kubectl exec pod -- curl -s {url}
 
-`sessionAffinity`: ClientIP|Node -  makes the service proxy redirect all requests originating from the same client IP
+`sessionAffinity`: `ClientIP`|Node -  makes the service proxy redirect all requests originating from the same client IP
 to the same pod.
+>`INFO` Kubernetes supports only two types of service session affinity: None and ClientIP.
+You may be surprised it doesn’t have a cookie-based session affinity option, but you
+need to understand that Kubernetes services don’t operate at the HTTP level. Services
+deal with TCP and UDP packets and don’t care about the payload they carry. Because
+cookies are a construct of the HTTP protocol, services don’t know about them, which
+explains why session affinity cannot be based on cookies.
+
 >`NOTE` When creating a service with multiple ports, you must specify a name
 for each port.
 ```
@@ -199,15 +221,31 @@ spec:
 that it enables you to change port numbers later without having to change the service
 spec.
 
-*DISCOVERING SERVICES THROUGH ENVIRONMENT VARIABLES*
-
-*DISCOVERING SERVICES THROUGH DNS*
-- curl http://kubia.default.svc.cluster.local
-
-*Connecting to services living outside the cluster* 5.2
-
-Exposing services to external clients
+Discovering services
 -
+*DISCOVERING SERVICES THROUGH ENVIRONMENT VARIABLES* (useless)
+*DISCOVERING SERVICES THROUGH DNS*
+
+- kubectl exec -it {name} bash
+- cat /etc/resolv.conf (result: default.svc.cluster.local)
+- curl http://{svc-name}
+>`NOTE` YOU CAN’T PING A SERVICE IP
+
+Connecting to services living outside the cluster (5.2.1)
+---
+- kubectl describe svc {svc-name}
+
+An Endpoints resource (yes, plural) is a list of IP addresses and ports exposing a service.
+The Endpoints resource is like any other Kubernetes resource, so you can display
+its basic info with `kubectl`
+- kubectl get endpoints {svc-name}
+>`NOTE` Although the pod selector is defined in the service spec, it’s not used directly when
+redirecting incoming connections. Instead, the selector is used to build a list of IPs
+and ports, which is then stored in the Endpoints resource.
+
+# Exposing services to external clients (5.3)
+>`NOTE` Services have default type: `ClusterIP`
+
 You have a few ways to make a service accessible externally:
 >* `Setting the service type to NodePort` —For a NodePort service, each cluster node
 opens a port on the node itself (hence the name) and redirects traffic received
@@ -225,5 +263,17 @@ resources in section 5.4.
 
 Ingerss
 -
+>`NOTE` Ingress controllers on cloud providers (in GKE, for example) require
+the Ingress to point to a NodePort service. But that’s not a requirement of
+Kubernetes itself.
+Multiple services can be exposed through a single Ingress.
 - minikube addons list
 - minikube addons enable ingress
+
+# Signaling when a pod is ready to accept connections
+Readiness probes
+-
+The readiness probe is invoked periodically and determines whether the specific
+pod should receive client requests or not.
+>`NOTE` Unlike liveness probes, if a container fails the readiness check, it won’t be killed or
+restarted. This is an important distinction between liveness and readiness probes.
