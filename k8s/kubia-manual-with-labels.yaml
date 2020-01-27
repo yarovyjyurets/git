@@ -7,8 +7,8 @@ metadata:
     env: prod
 spec:
   containers:
-  - image: luksa/kubia
-    name: kubia
-    ports:
-    - containerPort: 8080
-      protocol: TCP
+    - image: luksa/kubia
+      name: kubia
+      ports:
+        - containerPort: 8080
+          protocol: TCP

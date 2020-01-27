@@ -6,8 +6,8 @@ spec:
   # nodeSelector:
   #   gpu: "true" #for selecting node by label in node
   containers:
-  - image: luksa/kubia
-    name: kubia
-    ports:
-    - containerPort: 8080
-      protocol: TCP
+    - image: luksa/kubia
+      name: kubia
+      ports:
+        - containerPort: 8080
+          protocol: TCP

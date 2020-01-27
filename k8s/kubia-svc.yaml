@@ -3,9 +3,10 @@ kind: Service
 metadata:
   name: kubia
 spec:
-  # sessionAffinity: ClientIP // check README.md
+  # sessionAffinity: ClientIP # check README.md
   selector:
     app: kubia
   ports:
-    - port: 80
-      targetPort: 8080 # or use named port from Pod spec
+    - name: http
+      port: 80
+      targetPort: http # or use named port from Pod spec
