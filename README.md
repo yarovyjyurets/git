@@ -200,6 +200,30 @@ that it enables you to change port numbers later without having to change the se
 spec.
 
 *DISCOVERING SERVICES THROUGH ENVIRONMENT VARIABLES*
+
 *DISCOVERING SERVICES THROUGH DNS*
 - curl http://kubia.default.svc.cluster.local
+
 *Connecting to services living outside the cluster* 5.2
+
+Exposing services to external clients
+-
+You have a few ways to make a service accessible externally:
+>* `Setting the service type to NodePort` —For a NodePort service, each cluster node
+opens a port on the node itself (hence the name) and redirects traffic received
+on that port to the underlying service. The service isn’t accessible only at the
+internal cluster IP and port, but also through a dedicated port on all nodes.
+>* `Setting the service type to LoadBalancer` , an extension of the NodePort type—This
+makes the service accessible through a dedicated load balancer, provisioned
+from the cloud infrastructure Kubernetes is running on. The load balancer redi-
+rects traffic to the node port across all the nodes. Clients connect to the service
+through the load balancer’s IP.
+>* `Creating an Ingress resource`, a radically different mechanism for exposing multiple ser-
+vices through a single IP address—It operates at the HTTP level (network layer 7)
+and can thus offer more features than layer 4 services can. We’ll explain Ingress
+resources in section 5.4.
+
+Ingerss
+-
+- minikube addons list
+- minikube addons enable ingress
