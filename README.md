@@ -302,3 +302,57 @@ the target port.
 >* Try connecting to the pod IP directly to confirm your pod is accepting connections
 on the correct port.
 >* If you can’t even access your
+
+# Volumes
+Type of volumes:
+>* `emptyDir` — A simple empty directory used for storing transient data.
+>* `hostPath` — Used for mounting directories from the worker node’s filesystem into the pod.
+>* `gitRepo` — A volume initialized by checking out the contents of a Git repository.
+>* `nfs` — An NFS share mounted into the pod.
+>* `gcePersistentDisk (Google Compute Engine Persistent Disk), awsElastic-
+BlockStore (Amazon Web Services Elastic Block Store Volume), azureDisk
+(Microsoft Azure Disk Volume)` — Used for mounting cloud provider-specific
+storage.Using volumes to share data between containers
+>* `cinder, cephfs , iscsi , flocker , glusterfs , quobyte , rbd , flexVolume , vsphere-
+Volume , photonPersistentDisk , scaleIO` — Used for mounting other types of
+network storage.
+>* `configMap , secret , downwardAPI` — Special types of volumes used to expose certain Kubernetes resources and cluster information to the pod.
+>* `persistentVolumeClaim` — A way to use a pre- or dynamically provisioned persistent storage. (We’ll talk about them in the last section of this chapter.)
+
+`emptyDir`
+-
+The volume’s lifetime is tied to that of the pod, the volume’s contents are
+lost when the pod is deleted.
+An emptyDir volume is especially useful for sharing files between containers
+running in the same pod. But it can also be used by a single container for when a container needs to write data to disk temporarily, such as when performing a sort
+operation on a large dataset, which can’t fit into the available memory.
+- k apply -f k8s/volumes/fortune-pod.yaml
+
+An emptyDir volume is the simplest type of volume, but other types build upon it.
+After the empty directory is created, they populate it with data. One such volume type
+is the `gitRepo` volume type, which we’ll introduce next.
+
+`gitRepo`
+-
+A `gitRepo` volume is basically an `emptyDir` volume that gets populated by cloning a
+Git repository and checking out a specific revision when the pod is starting up (but
+before its containers are created). A gitRepo volume, like the emptyDir volume, is basically a dedicated directory cre-
+ated specifically for, and used exclusively by, the pod that contains the volume. When
+the pod is deleted, the volume and its contents are deleted.
+
+`hostPath`
+-
+A hostPath volume points to a specific file or directory on the node’s filesystem. Pods running on the same node and using the same path in their host-
+Path volume see the same files.
+
+`hostPath` volumes are the first type of persistent storage we’re introducing, because
+both the gitRepo and emptyDir volumes’ contents get deleted when a pod is torn
+down, whereas a hostPath volume’s contents don’t. Because the volume’s contents are stored on a specific
+node’s filesystem, when the database pod gets rescheduled to another node, it will no
+longer see the data. This explains why it’s not a good idea to use a hostPath volume
+for regular pods, because it makes the pod sensitive to what node it’s scheduled to.
+>`TIP` Remember to use hostPath volumes only if you need to read or write sys-
+tem files on the node. Never use them to persist data across pods.
+
+Persistent storage (GKE)
+-
