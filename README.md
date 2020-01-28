@@ -354,5 +354,25 @@ for regular pods, because it makes the pod sensitive to what node it’s schedul
 >`TIP` Remember to use hostPath volumes only if you need to read or write sys-
 tem files on the node. Never use them to persist data across pods.
 
-Persistent storage (GKE)
--
+# Deployment
+You have two ways of updating all those pods. You can do one of the following:
+>* Delete all existing pods first and then start the new ones.
+>* Start new ones and, once they’re up, delete the old ones. You can do this either
+by adding all the new pods and then deleting all the old ones at once (`blue-green deployment`), or
+sequentially (`rolling update`), by adding new pods and removing old ones gradually.
+
+At the beginning of this section, I mentioned an even better way of doing updates
+than through `kubectl rolling-update` .
+
+- kubectl `rolling-update` kubia-v1 kubia-v2 --image=luksa/kubia:v2 --v 6
+>`NOTE` Using the --v 6 option increases the logging level enough to let you see
+the requests kubectl is sending to the API server.
+
+But why is it such a bad thing that the update process is being performed by the client
+instead of on the server? Well, in your case, the update went smoothly, but what if you
+lost network connectivity while kubectl was performing the update? The update pro-
+cess would be interrupted mid-way. Pods and ReplicationControllers would end up in
+an intermediate state.
+
+>`TIP` Use the verbose logging option when running other kubectl commands,
+to learn more about the communication between kubectl and the API server.
