@@ -1,7 +1,10 @@
 https://www.yunforum.net/pdf/kubernetes-in-action.pdf
 COMMANDS
 -
-
+- kubectl config view
+- kubectl config get-contexts
+- kubectl config use-context 
+- gcloud container clusters list
 - gcloud container clusters create kubia --num-nodes 3 --machine-type f1-micro
 
 - kubectl run kubia --image=luksa/kubia --port=8080 --generator=run/v1
@@ -376,3 +379,69 @@ an intermediate state.
 
 >`TIP` Use the verbose logging option when running other kubectl commands,
 to learn more about the communication between kubectl and the API server.
+
+Creating Deployment
+-
+Creating a Deployment isn’t that different from creating a ReplicationController. A
+Deployment is also composed of a label selector, a desired replica count, and a pod
+template. In addition to that, it also contains a field, which specifies a deployment
+strategy that defines how an update should be performed when the Deployment
+resource is modified.
+- kubectl apply -f k8s/kubia-deployment.yaml --record
+
+*DISPLAYING THE STATUS OF THE DEPLOYMENT ROLLOUT*
+- kubectl get deployment
+- kubectl describe deployment
+- kubectl rollout status deployment kubia
+
+`UNDERSTANDING THE AVAILABLE DEPLOYMENT STRATEGIES`
+
+- `RollingUpdate`: [default] (removes old pods one by one,
+while adding new ones at the same time, keeping the application available throughout
+the whole process, and ensuring there’s no drop in its capacity to handle requests.)
+The upper and lower limits for the number of pods above
+or below the desired replica count are configurable. 
+>`NOTE` **You should use `RollingUpdate` strategy only
+when your app can handle running both the old and new version at the same time.**
+- `Recreate` (deletes all the old pods at once and then creates new ones, similar to modifying a
+ReplicationController’s pod template and then deleting all the pods. The `Recreate` strategy causes all old pods to be deleted before the new ones are
+created.)
+
+Slow down update
+- kubectl patch deployment kubia -p '{"spec": {"minReadySeconds": 10}}'
+>`TIP` The kubectl patch command is useful for modifying a single property
+or a limited number of properties of a resource without having to edit its definition
+in a text editor. This doesn’t
+cause any kind of update to the pods, because you didn’t change the pod template.
+Changing other Deployment properties, like the desired replica count or the deployment
+strategy, also doesn’t trigger a rollout, because it doesn’t affect the existing individual
+pods in any way.
+- kubectl set image deployment kubia kubia=luksa/kubia:v2
+
+>`NOTE` Be aware that if the pod template in the Deployment references a
+ConfigMap (or a Secret), modifying the ConfigMap will not trigger an
+update. One way to trigger an update when you need to modify an app’s config
+is to create a new ConfigMap and modify the pod template so it references
+the new ConfigMap.
+
+**UNDOING A ROLLOUT**
+- kubectl rollout undo deployment kubia
+- kubectl rollout history deployment kubia (`history`)
+- kubectl rollout undo deployment kubia --to-revision=1
+
+**CONTROLLING THE RATE OF THE ROLLOUT**
+```
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+```
+
+The `minReadySeconds` property specifies how long a newly created pod should be
+ready before the pod is treated as available. Until the pod is available, the rollout process
+will not continue (remember the `maxUnavailable` property?). A pod is ready
+when readiness probes of all its containers return a success. If a new pod isn’t functioning
+properly and its readiness probe starts failing before `minReadySeconds` have
+passed, the rollout of the new version will effectively be blocked.
