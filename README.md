@@ -3,7 +3,8 @@ COMMANDS
 -
 - kubectl config view
 - kubectl config get-contexts
-- kubectl config use-context 
+- kubectl config use-context
+- kubectl config current-context
 - gcloud container clusters list
 - gcloud container clusters create kubia --num-nodes 3 --machine-type f1-micro
 
